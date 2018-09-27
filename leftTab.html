@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>左侧tab 右侧加载数据</title>
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1.0,maximum-scale=1.0, minimum-scale=1.0,user-scalable=0">
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <style>
+        *{
+            padding: 0px;
+            margin: 0px;
+        }
+        .leftTab{
+            font-size: 0.3rem;
+            width: 1.7rem;
+            background-color: rgb(242,242,242);
+            height: 100%;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+        .leftTab li{
+            height: 1.1rem;
+            line-height: 1.1rem;
+            text-align: center;
+        }
+        .selected{
+            background-color: white;
+            color:#f84444;
+            position:relative
+        }
+        .selected:before{
+            position:absolute;
+            content:'';
+            background-color:#f84444;
+            width:0.06rem;
+            height:0.5rem;
+            left:0;
+            top:0.3rem;
+        }
+    </style>
+</head>
+<body>
+<ul class="leftTab">
+    <li class="selected">收藏</li>
+    <li>推荐</li>
+    <li>早晚安</li>
+    <li>正能量</li>
+    <li>节日热点</li>
+    <li>团队增员</li>
+    <li>奋斗日常</li>
+    <li>客照作品</li>
+    <li>营销海报</li>
+</ul>
+</body>
+<script>
+    <!--设置全局rem-->
+    (function(){
+        var designW = 750;  //设计稿宽
+        var font_rate = 100;
+        //适配
+        document.getElementsByTagName("html")[0].style.fontSize = document.body.offsetWidth / designW * font_rate + "px";
+        document.getElementsByTagName("body")[0].style.fontSize = document.body.offsetWidth / designW * font_rate + "px";
+        //监测窗口大小变化
+        window.onresize=function() {
+            document.getElementsByTagName("html")[0].style.fontSize = document.body.offsetWidth / designW * font_rate + "px";
+            document.getElementsByTagName("body")[0].style.fontSize = document.body.offsetWidth / designW * font_rate + "px";
+        }
+    })();
+</script>
+<script>
+    let page=0
+    $(document).ready(function () {
+        getData(page,'123');
+		$('.leftTab li').off('click').on('click',function () {
+            $(window).scrollTop('0');
+            $(this).addClass('selected');
+            $(this).siblings().removeClass('selected');
+            let classid2 = $(this).attr('class').split(' ')[0];
+                //每次点击的时候page赋为0
+            page=0;
+            //当不存在的时候就去请求数据
+            if (!$('div.'+classid2).length) {
+                getData(page,classid2)
+            }else{
+                    //存在当前区域的tab就显示，兄弟节点隐藏
+                $('div.'+classid2).show();
+				$('div.'+classid2).siblings().hide()
+            }
+        })
+    })
+    //classid 是分类的标志，与左侧数据相对应
+    function getData(page,classid) {
+        let url = ''
+        let data = {
+            page:page,
+            classid:classid
+        }
+        ajaxGet(url,data).then(res=>{
+            //tab选项 ，只需要渲染一次，存在就不需要再加载
+            if (!$('.leftTab li').length){
+                for (let i =0;i<res.mm_class.length;i++){
+                    let  id = res.mm_class[i].classid
+                    $('.leftTab').append('<li class="'+id+'">'+res.mm_class[i].title+'</li>');
+                    $('.leftTab li.'+classid).addClass('selected');
+                }
+            }
+            //如果不存在就需要创建
+            if(!$('div.'+classid).length){
+                $('.content').append('<div class="contentId '+classid+'"></div>');
+            }
+
+            $('div.'+classid).siblings().hide();
+            for (let j =0;j<res.mm_item.length;j++){
+                $('div.'+classid).append(' <block onclick="window.location.href = \'slide.html?classid='+res.mm_item[j].id+'\'"> <img src="'+res.mm_item[j].image+'" class="blobkImg" /><p class="read">'+res.mm_item[j].views+'阅读</p><p>'+res.mm_item[j].title+'</p> </block>');
+
+            }
+
+
+
+            // if (page==0){
+            //     posterArray=[]
+            // }
+            // for (let j =0;j<res.mm_item.length;j++){
+            //     if (res.mm_item[j].isvip==1){
+            //         if (isvip==1){
+            //             posterArray.push(res.mm_item[j])
+            //             $('div.'+classid).append(' <block onclick="window.location.href = \'slide.html?classid='+res.mm_item[j].id+'\'"> <img src="'+res.mm_item[j].image+'" class="blobkImg" /><p class="read">'+res.mm_item[j].views+'阅读</p><img src="images/poster_vip@3x.png" class="vipLogo"/><p>'+res.mm_item[j].title+'</p> </block>');
+            //         }else{
+            //             $('div.'+classid).append(' <block onclick="alert(\'会员可看哦\')"> <img src="'+res.mm_item[j].image+'" class="blobkImg" /><p class="read">'+res.mm_item[j].views+'阅读</p><img src="images/poster_vip@3x.png" class="vipLogo"/><p>'+res.mm_item[j].title+'</p> </block>');
+            //
+            //         }
+            //     } else{
+            //         posterArray.push(res.mm_item[j]);
+            //         $('div.'+classid).append(' <block onclick="window.location.href = \'slide.html?classid='+res.mm_item[j].id+'\'"> <img src="'+res.mm_item[j].image+'" class="blobkImg" /><p class="read">'+res.mm_item[j].views+'阅读</p><p>'+res.mm_item[j].title+'</p> </block>');
+            //     }
+            // }
+            // localStorage.setItem("poster",JSON.stringify(posterArray))
+
+
+
+         
+        })
+    }
+    function   ajaxGet(url,data){
+        return new Promise(function(resolve,reject){
+            $.ajax({
+                url:url,
+                data:data,
+                type:'GET',
+                success:function(res){
+                    resolve(res);
+                },
+                fail:function(res){
+                    reject(res)
+                }
+            })
+        })
+    }
+	//滑动到底部触发请求，加载数据
+	$(window).scroll(function(){
+        // scroll at bottom
+        // console.log($(window).scrollTop(),$(window).height()+'  '+$(document).height())
+        if ($(window).scrollTop() + $(window).height() == $(document).height()) {
+            let classid = $('.selected').attr('class').split(' ')[0];
+            getData(page+=1,classid)
+        }
+    });
+</script>
+</html>
