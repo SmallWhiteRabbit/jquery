@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>循环轮播</title>
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1.0,maximum-scale=1.0, minimum-scale=1.0,user-scalable=0">
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+        html,body{
+            height: 100%;
+        }
+        .slideBox{
+            width: 7.5rem;
+            height: 100%;
+            overflow-y: hidden;
+        }
+        .slideBox li{
+            list-style: none;
+            float: left;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+        #nextImg{
+            position: absolute;
+            top: 38%;
+            right: 0px;
+            background-color: #ccc;
+            text-align: center;
+            height: 1.3rem;
+            line-height: 1.3rem;
+            border-radius: 3px;
+        }
+        #prevImg{
+            position: absolute;
+            top: 38%;
+            left: 0px;
+            background-color: #ccc;
+            text-align: center;
+            height: 1.3rem;
+            line-height: 1.3rem;
+            border-radius: 3px;
+        }
+        #nextImg img,#prevImg img{
+            width: 0.62rem;
+            height: 0.62rem;
+            position: relative;
+            top: -0.05rem;
+        }
+        .slideImg{
+            width: 6rem;
+            height:10.66rem;
+        }
+        .bottomSection{
+            position: fixed;
+            bottom: 0px;
+            font-size: 0.24rem;
+            display: flex;
+            height: 1rem;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            box-shadow: 1px 0px 6px #cccccc;
+            background-color: white;
+            z-index: 5;
+        }
+        .bottomSection p{
+            width: 50%;
+            text-align: center;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: rgb(51,51,51);
+        }
+        .bottomSection p:first-child:after{
+            position: absolute;
+            right: 0px;
+            top: 0.4rem;
+            content: '';
+            background-color: #CCCCCC;
+            width: 0.02rem;
+            height: 0.3rem;
+        }
+        .slideCon{
+            height: 91%;
+            position: relative;
+        }
+        .infor{
+            position: absolute;
+            bottom: 0.1rem;
+            font-size: 0.24rem;
+            width: 6.6rem;
+            display: flex;
+            height: 1.2rem;
+            z-index: 10;
+            left: 0.45rem;
+            background-color: rgba(0,0,0,0.3);
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+        .erweima{
+            width: 0.82rem;
+            height: 0.82rem;
+            margin-right: 0.2rem;
+        }
+        .face{
+            width: 0.72rem;
+            height: 0.72rem;
+            margin-left: 0.2rem;
+        }
+        .inforCon{
+            display: flex;
+            /*padding-left: 0.2rem;*/
+            align-items: center;
+        }
+        .inforCon div{
+            margin-left: 0.2rem;
+        }
+        .hide{
+            display: none;
+        }
+        .bottomImg{
+            margin-right: 0.03rem;
+            width: 0.5rem;
+            height: 0.5rem;
+        }
+        /*提示*/
+        .tipAddCard {
+            position: absolute;
+            bottom: 0.9rem;
+            font-size: 0.24rem;
+            width: 2rem;
+            right: 0.7rem;
+            background-color: #f84444;
+            color: white;
+            border-radius: 0.05rem;
+            padding: 0.2rem;
+            z-index: 10;
+        }
+        .tipAddCard:after{
+            content: '';
+            position: absolute;
+            width: 0px;
+            height: 0px;
+            line-height: 0px;
+            border: 0.25rem transparent solid;
+            border-top-color: #f84444;
+            bottom: -0.38rem;
+            right: 0.9rem;
+        }
+    </style>
+    <script src="../commonJs/jquery-3.3.1.min.js"></script>
+</head>
+<body>
+
+<section class="slideCon">
+    <ul class="slideBox">
+    </ul>
+    <div class="infor hide">
+        <div class="inforCon">
+            <img src="../card/images/2.png" class="face"/>
+            <div>
+                <p class="name">姓名</p>
+                <p class="telphone">电话</p>
+                <p class="work">行业</p>
+            </div>
+        </div>
+
+        <img src="../card/images/2.png" class="erweima"/>
+    </div>
+</section>
+
+<span id="nextImg"><img src="images/btn_page_next@3x.png" class="btnPrev"/></span>
+<span id="prevImg"><img src="images/btn_page_pre@3x.png" class="btnnext"/></span>
+
+<p class="tipAddCard ">更换图片后，需要再次点击哦！</p>
+
+</body>
+<script>
+    <!--设置全局rem-->
+    (function(){
+        var designW = 750;  //设计稿宽
+        var font_rate = 100;
+        //适配
+        document.getElementsByTagName("html")[0].style.fontSize = document.body.offsetWidth / designW * font_rate + "px";
+        document.getElementsByTagName("body")[0].style.fontSize = document.body.offsetWidth / designW * font_rate + "px";
+        //监测窗口大小变化
+        window.onresize=function() {
+            document.getElementsByTagName("html")[0].style.fontSize = document.body.offsetWidth / designW * font_rate + "px";
+            document.getElementsByTagName("body")[0].style.fontSize = document.body.offsetWidth / designW * font_rate + "px";
+        }
+    })();
+</script>
+<script>
+
+    $(document).ready(function () {
+        //数据格式
+        let poster =[
+            {id: "1005", title: "全民健身", image: "http://m9pic.mm999.com//poster/201809/20180926174525031.jpg"},
+            {id: "1001",  title: "明星同款", image: "http://m9pic.mm999.com//poster/201809/20180925142402142.jpg?imageMogr2/thumbnail/360x"},
+            {id: "1000",  title: "正能量", image: "http://m9pic.mm999.com//poster/201809/20180925142309204.jpg?imageMogr2/thumbnail/360x"},
+            {id: "996",   title: "营销海报", image: "http://m9pic.mm999.com//poster/201809/20180921152709343.jpg?imageMogr2/thumbnail/360x"},
+            {id: "979",   title: "早安", image: "http://m9pic.mm999.com//poster/201809/20180920140541211.jpg?imageMogr2/thumbnail/360x"},
+    ];
+
+        for (let i =0;i<poster.length;i++){
+            $('.slideBox').append('<li><img src="'+poster[i].image+'" class="slideImg '+poster[i].id+'"></li>')
+        }
+        //动画效果
+        let css = {bottom:'1.2rem'}
+        $('.tipAddCard').animate(css,600,callBack);
+        function callBack(){
+            if(css.bottom==='1.2rem')
+                css.bottom='0.9rem';
+            else if(css.bottom==='0.9rem')
+                css.bottom='1.2rem';
+            $('.tipAddCard').animate(css,600,callBack);
+
+        }
+        //下一张
+        $('#nextImg').off('click').on('click',function () {
+            if(!$(".slideBox li:first").is(":animated")){
+                $(".slideBox li:first").animate({'marginLeft':'-=375px'},500,function(){
+                    $(".slideBox li:first").css('marginLeft','0px');
+                    $('.slideBox').append($(".slideBox li:first"));
+                });
+            }
+
+        })
+        //上一张
+        $('#prevImg').off('click').on('click',function () {
+            if(!$(".slideBox li:first").is(":animated")){
+                $('.slideBox').prepend($(".slideBox li:last"));
+                $('.slideBox li:first').css({'marginLeft':'-375px'});
+                $(".slideBox li:first").animate({'marginLeft':'+=375px'},500,function(){
+                    $(".slideBox li:first").css('marginLeft','0px');
+                });
+            }
+
+        });
+        let classid = GetQueryString('classid');
+        if(classid){
+            tabTo(classid,poster)
+        }
+
+    });
+    //直接跳转到相应的图片
+    function tabTo(classid,poster) {
+        for (let i =0;i<poster.length;i++){
+            if (classid==poster[i].id){
+                $('.slideBox').prepend( $('.slideBox li:nth-child('+(i+1)+')'));
+                // document.title = poster[i].title
+            }
+        }
+    }
+    //url中带有classid的参数
+    function GetQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);//search,查询？后面的参数，并匹配正则
+        if (r != null) return decodeURI(r[2]);
+        return null;
+    }
+    </script>
+</body>
+</html>
