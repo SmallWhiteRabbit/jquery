@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>循环</title>
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1.0,maximum-scale=1.0, minimum-scale=1.0,user-scalable=0">
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <style>
+        *{
+            padding: 0px;
+            margin: 0px;
+        }
+        .laba{
+            display: flex;
+            /*justify-content: safe;*/
+            align-items: center;
+            height: 20px;
+            overflow: hidden;
+            position: absolute;
+            top: 4%;
+            font-size: 12px;
+            line-height: 20px;
+            padding: 0 15px 0px 10px;
+            background-color: #f39e1f;
+            border-radius: 0 10px 10px 0;
+            color: white;
+        }
+        .ulImg{
+            width: 14px;
+            height: 18px;
+            /* position: relative; */
+            margin-top: 2px;
+        }
+        .laba2{
+            position: relative;
+            top: 50px;
+            overflow: hidden;
+            font-size: 12px;
+            line-height: 20px;
+            height: 20px;
+            background-color: #f39e1f;
+            border-radius: 0 10px 10px 0;
+            color: white;
+            display: inline-block;
+            padding: 0px 20px 0px 10px;
+        }
+        .laba2 li{
+            list-style: none;
+        }
+        .ulImg2{
+            margin-top: 2px;
+            width: 14px;
+            height: 18px;
+        }
+        .ulWord{
+             position: relative;
+             top: -5px;
+             left: 5px;
+         }
+        /*提示*/
+        .tipAddCard {
+            position: absolute;
+            bottom: 45px;
+            font-size: 12px;
+            width: 100px;
+            right: 35px;
+            background-color: #f84444;
+            color: white;
+            border-radius: 5px;
+            padding: 10px;
+            z-index: 10;
+        }
+        .tipAddCard:after{
+            content: '';
+            position: absolute;
+            width: 0px;
+            height: 0px;
+            line-height: 0px;
+            border: 10px transparent solid;
+            border-top-color: #f84444;
+            bottom: -20px;
+            right: 44px;
+        }
+    </style>
+</head>
+<body>
+<div class="laba">
+    <img class="ulImg" src="./images/zhuanqian_img_laba@3x.png" >
+    <div id="demo" style="height: 20px;margin-left: 5px;">
+        <p >永颜dddd获得60.8元奖金</p>
+        <p >永颜ddd获得60.8元奖金</p>
+        <p>永颜dd获得60.8元奖金</p>
+        <p >永颜d获得60.8元奖金</p>
+    </div>
+</div>
+
+<ul id="demo2" class="laba2">
+    <li><img class="ulImg2" src="./images/zhuanqian_img_laba@3x.png" ><span class="ulWord">永颜dddd获得60.8元奖金</span></li>
+    <li><img class="ulImg2" src="./images/zhuanqian_img_laba@3x.png" ><span class="ulWord">永颜ddd获得60.8元奖金</span></li>
+    <li><img class="ulImg2" src="./images/zhuanqian_img_laba@3x.png" ><span class="ulWord">永颜dd获得60.8元奖金</span></li>
+    <li><img  class="ulImg2" src="./images/zhuanqian_img_laba@3x.png" ><span class="ulWord">永颜d获得60.8元奖金</span></li>
+</ul>
+
+<p class="tipAddCard">更换图片后，需要再次点击哦！</p>
+
+
+<script>
+    function AutoScroll(obj) {
+        $(obj).find("p:first").animate({
+            marginTop:"-22px"
+        },1000,function(){
+            $(this).remove();
+            $(this).css({
+                marginTop:"0px"
+            })
+            $(obj).append($(this))
+        })
+    }
+    setInterval('AutoScroll("#demo")', 1000);
+
+    function AutoScroll2(obj) {
+        $(obj).find("li:first").animate({
+                marginTop: "-22px"
+            },
+            500,
+            function() {
+                $(this).remove();
+                $(this).css({
+                    marginTop:"0px"
+                })
+                $(obj).append($(this))
+            });
+    }
+    setInterval('AutoScroll2("#demo2")', 1000);
+
+
+    let css = {bottom:'60px'}
+    $('.tipAddCard').animate(css,600,callBack);
+    function callBack(){
+        if(css.bottom==='60px')
+            css.bottom='45px';
+        else if(css.bottom==='45px')
+            css.bottom='60px';
+        $('.tipAddCard').animate(css,600,callBack);
+
+    }
+</script>
+</body>
+</html>
