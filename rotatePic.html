@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>图片点击旋转换成另一张图</title>
+
+
+ 
+
+ 
+   
+    <style>
+
+          
+    *{
+        padding: 0px;
+        margin:0px;
+    }
+    
+
+    /* 三变成✕ */
+    .dh {
+        width: 100px;
+        height: 100px;
+        position: relative;
+    }
+    .dh:before, .dh:after {
+        content: "";
+        width: 100px;
+        height: 16px;
+        border-radius: 8px;
+        background-color: #000;
+        position: absolute;
+        transition: all 0.15s ease-in-out;  /*设置旋转持续时间*/
+        -webkit-transition: all 0.15s ease-in-out;/*兼容性处理等同于上代码*/
+    }
+    .dh:before {
+        top: 0;
+        box-shadow: 0 42px #000;
+    }
+    .dh:after {
+        bottom: 0;
+    }
+    .dh:hover:before {
+        top: 42px;
+        box-shadow: none;
+        transform: rotate(225deg);/*顺时针旋转225度*/
+        -webkit-transition: rotate(225deg);/*兼容性处理等同于上代码*/
+    }
+    .dh:hover:after {
+        bottom: 42px;
+        transform: rotate(135deg);/*顺时针旋转135度*/
+        -webkit-transition: rotate(135deg);/*兼容性处理等同于上代码*/
+    }
+
+    /* 我的 */
+    .addTap ,.cancle{
+        position: absolute;
+        right: 15px;
+        top: 11px;
+        width: 23px;
+        z-index: 10;
+    } 
+    .hide{
+        display: none;
+    }  
+    
+/*右上角动画*/
+.rotate90{
+    animation: rotate90 0.1s;
+}
+
+@keyframes rotate90
+{
+    from {}
+    to {transform: rotateZ(90deg);}
+}
+
+@-moz-keyframes rotate90 /* Firefox */
+{
+    from {}
+    to {transform: rotateZ(90deg);}
+}
+
+@-webkit-keyframes rotate90 /* Safari 和 Chrome */
+{
+    from {}
+    to {transform: rotateZ(90deg);}
+}
+
+@-o-keyframes rotate90 /* Opera */
+{
+    from {}
+    to {transform: rotateZ(90deg);}
+}
+
+.rotate-90{
+    animation: rotate-90 0.1s;
+}
+@keyframes rotate-90
+{
+    from {}
+    to {transform: rotateZ(-90deg);}
+}
+
+@-moz-keyframes rotate-90 /* Firefox */
+{
+    from {}
+    to {transform: rotateZ(-90deg);}
+}
+
+@-webkit-keyframes rotate-90 /* Safari 和 Chrome */
+{
+    from {}
+    to {transform: rotateZ(-90deg);}
+}
+
+@-o-keyframes rotate-90 /* Opera */
+{
+    from {}
+    to {transform: rotateZ(-90deg);}
+}
+
+    </style>
+    </head><body>
+    <!-- 百度到的 -->
+        <div class="dh"> </div>
+    <!-- 我的实际解决档案 -->
+        <div class="imgContainer">
+            <img src="images/home_btn_sort@3x.png" class="addTap" onclick="showContent()"/>
+            <img src="images/cancle.png" class=" hide cancle" onclick="hideContent()"/>
+        </div>
+    </body>
+    
+    <script src="js/jquery-3.3.1.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(function(){
+
+
+        })
+        //点击右上角图标调用
+        function showContent(){
+            $(".addTap").toggleClass("rotate90")
+            $(".cancle").removeClass("rotate-90")
+            
+            document.getElementsByClassName("addTap")[0].addEventListener("animationend",function(){
+                $(".cancle").removeClass('hide')
+                $(".addTap").addClass('hide')
+            });
+        }
+        //y右上角X图标
+        function hideContent() {
+            $(".cancle").toggleClass("rotate-90")
+            $(".addTap").removeClass("rotate90")
+            document.getElementsByClassName("cancle")[0].addEventListener("animationend",function(){
+                $(".cancle").addClass('hide')
+                $(".addTap").removeClass('hide')
+            });
+
+        }
+    </script>
+</html>

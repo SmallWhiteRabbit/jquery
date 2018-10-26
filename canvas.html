@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>canvas画图</title>
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1.0,maximum-scale=1.0, minimum-scale=1.0,user-scalable=0">
+    <script src="../makeMoney/jquery-3.3.1.min.js"></script>
+    <style>
+        *{
+            margin: 0px;
+            padding: 0px;
+        }
+    </style>
+</head>
+<body>
+<section class="hide">
+    <canvas id="lastImg"></canvas>
+</section>
+</body>
+<script>
+    $(document).ready(function () {
+        drawImg()
+    })
+    function drawImg() {
+        let canvas=document.getElementById("lastImg");
+        let  ctx=canvas.getContext("2d");
+        //window.devicePixelRatio是设备的物理像素和设备独立像素(device-independent pixels (dips))的比例。
+        // 公式表示为：window.devicePixelRatio = 物理像素 / dips
+
+        devicePixelRatio = window.devicePixelRatio || 1,
+            backingStoreRatio = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1,
+            ratio = devicePixelRatio / backingStoreRatio;
+
+console.log('window.devicePixelRatio',window.devicePixelRatio)
+        let width = window.innerWidth;//屏幕大小
+        let height = width*16/9;
+        canvas.width = width *ratio;
+        canvas.height =height*ratio;
+        canvas.style.width = width+'px';
+        canvas.style.height =height+'px';
+
+        let img='http://m9pic.mm999.com//poster/201809/20180926174525031.jpg';
+        let image=new Image()
+        image.src=img
+        image.onload = function(){
+            ctx.drawImage(image,0,0,width,height);
+        }
+        let imgSrc =canvas.toDataURL("image/png");
+        let filename = new Date().getTime() + '.png'
+        file = dataURLtoFile(imgSrc, filename);
+        ctx.scale(ratio,ratio)
+    }
+    function dataURLtoFile(dataurl, filename) {
+        var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new File([u8arr], filename, { type: mime });
+    }
+</script>
+</html>
