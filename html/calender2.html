@@ -65,7 +65,7 @@
                 Day: new Date().getDate(), //当前天
                 target: '', //父元素日历的父元素
                 showModule: '', //日历展示块儿
-                checkDay: [1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 20], //已经签到的日期 可根据不同月份发送请求更改数据
+                checkDay: [1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 19], //已经签到的日期 可根据不同月份发送请求更改数据
                 className: "selected", //选中时的样式，
                 patchCard: "2", //复活卡数量
             },
@@ -148,6 +148,13 @@
                         // 今日之后不能签到
                         $(".showDay").find(".row").last().append("<span class='dayNum dayNoClick' >" + index + "</span>")
 
+                    } else if (index == that.defaults.Day) {
+                        // 今天签到不需要补签卡
+                        $(".showDay").find(".row").last().append("<span class='dayNum dayCanClick' >" + index + "</span>")
+                        $(".dayCanClick").last().on("click", function() {
+                            that.addClass($(this));
+                            $(this).unbind();
+                        })
                     } else {
                         //今天之前的日期才可签到
                         if (that.defaults.checkDay[m] == index) {
