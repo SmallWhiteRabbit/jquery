@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>签到日历</title>
+    <!--第一版 此版本只显示当前月 上下两月日期不存在 样式需要微调，可手动添加-->
+    <!-- 今日之后不可签到 今日之前可签到 -->
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width,initial-scale=1.0,maximum-scale=1.0, minimum-scale=1.0,user-scalable=0'>
+    <script src='../js/jquery-3.3.1.min.js'></script>
+
+    <style>
+        * {
+            padding: 0px;
+            margin: 0px;
+        }
+        
+        .calender {
+            width: 100%;
+            text-align: center
+        }
+        
+        .dayNum {
+            display: inline-block;
+            width: 45px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+        }
+        
+        .selected {
+            background-color: #fd888f;
+            color: #FFFFFF;
+        }
+        
+        .dayNoClick {
+            color: #ccc;
+        }
+        
+        .block {
+            display: inline-block;
+            padding: 10px 5px;
+            background-color: #f2f2f2;
+        }
+        
+        .block>img {
+            width: 16px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div id="calender" class="calender">
+    </div>
+    <script>
+        $(function() {
+            calender.init("#calender");
+
+        })
+        let calender = {
+            defaults: {
+                Date: new Date(), //当前时间
+                Year: new Date().getFullYear(), //年份
+                Month: new Date().getMonth(), //月份
+                Day: new Date().getDate(), //当前天
+                target: '', //父元素日历的父元素
+                showModule: '', //日历展示块儿
+                checkDay: [1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 20], //已经签到的日期
+                className: "selected", //选中时的样式，
+                patchCard: "2", //复活卡数量
+            },
+            init: function(target) {
+                if (target) {
+                    this.defaults.target = target
+                }
+                this.lastMonth();
+                this.showCurrentTime();
+                this.netMonth();
+
+                let last_date = this.getLastDate(this.defaults.Year, this.defaults.Month)
+                let weekDay = this.TheFirstDayOfMonthIsTheDay(this.defaults.Year, this.defaults.Month)
+                this.showDate(target, last_date, weekDay);
+
+            },
+            getLastDate: function(year, month) {
+                var new_date = new Date(year, month + 1, 0);
+                //这里传入的0代表获取上一个月的最后一天；如果传1，则获得当月的第一天；
+                return new_date.getDate();
+            },
+            TheFirstDayOfMonthIsTheDay: function(year, month) {
+                //每个月的第一天星期几 如果传1，则获得当月的第一天；
+                var new_date = new Date(year, month, 1);
+                return new_date.getDay()
+            },
+            showDate: function(target, num, weekDay) {
+                let that = this;
+                if ($(".showDay").length == 0) {
+                    $(target).append("<div class='showDay'></div>");
+                    that.defaults.showModule = "showDay"
+                } else {
+                    $(".showDay").empty();
+                }
+                let week = ["日", "一", "二", "三", "四", "五", "六"]
+                $(".showDay").append("<p class='row'></p>")
+                for (let index = 0; index < week.length; index++) {
+                    const element = week[index];
+                    $(".showDay").find(".row").last().append("<span class='dayNum'>" + element + "</span>")
+                }
+                for (let index = 0; index < weekDay; index++) {
+                    let spanNum = $(target).find(".row").last().find(".dayNum").length;
+                    if (spanNum % 7 == 0) {
+                        $(".showDay").append("<p class='row'></p>")
+                    }
+                    $(".showDay").find(".row").last().append("<span class='dayNum'></span>")
+                }
+                var m;
+                m = 0;
+                for (let index = 1; index <= num; index++) {
+                    let spanNum = $(target).find(".row").last().find(".dayNum").length;
+                    if (spanNum % 7 == 0) {
+                        $(".showDay").append("<p class='row'></p>")
+                    }
+                    if (index > that.defaults.Day) {
+                        // 今日之后不能签到
+                        $(".showDay").find(".row").last().append("<span class='dayNum dayNoClick' >" + index + "</span>")
+                    } else {
+                        //今天之前的日期才可签到
+                        if (that.defaults.checkDay[m] == index) {
+                            if (m < that.defaults.checkDay.length - 1) {
+                                m += 1;
+                            }
+                            // 已经签到 不能签到
+                            $(".showDay").find(".row").last().append("<span class='dayNum dayHasSelected' >" + index + "</span>")
+                            that.addClass($(".dayHasSelected").last())
+                        } else {
+                            $(".showDay").find(".row").last().append("<span class='dayNum dayCanClick' >" + index + "</span>")
+                            $(".dayCanClick").last().on("click", function() {
+                                if (that.defaults.patchCard > 0) {
+                                    that.defaults.patchCard -= 1;
+                                    let date = that.getTime(that.defaults.Year, that.defaults.Month, index);
+                                    that.showCurrentTime()
+                                    that.addClass($(this));
+                                    $(this).unbind();
+                                } else {
+                                    alert("必须要有复活卡才能补签")
+                                }
+                            })
+                        }
+
+                    }
+                }
+            },
+            lastMonth: function() {
+                let that = this
+                if ($(".last").length == 0) {
+                    $(that.defaults.target).append("<div class='last block'><img src='../images/btn_page_pre@3x.png'></div>")
+                }
+                $(".last").on("click", function() {
+                    that.defaults.Month -= 1;
+                    // 展示月比当前月小 即历史月 需要展示签到记录 Day为展示月的总天数 展示月等于当前月 Day为今天的日期  均可签到
+                    let currentMonth = new Date().getMonth();
+                    if (currentMonth > that.defaults.Month) {
+                        that.defaults.Day = that.getLastDate(that.defaults.Year, that.defaults.Month)
+                    } else if (currentMonth == that.defaults.Month) {
+                        that.defaults.Day = new Date().getDate()
+                    }
+                    let last_date = that.getLastDate(that.defaults.Year, that.defaults.Month)
+                    let weekDay = that.TheFirstDayOfMonthIsTheDay(that.defaults.Year, that.defaults.Month)
+                    that.showDate(that.defaults.target, last_date, weekDay);
+                    that.showCurrentTime()
+
+                })
+
+            },
+            netMonth: function() {
+                let that = this
+                if ($(".next").length == 0) {
+                    $(that.defaults.target).append("<div class='next block'><img src='../images/btn_page_next@3x.png'></div>")
+                }
+                $(".next").on("click", function() {
+                    that.defaults.Month += 1;
+                    // 展示月比当前月大 即之后的月 Day为0 不能签到 展示月就是当前月 day为今天 可签到
+                    let currentMonth = new Date().getMonth();
+                    if (currentMonth < that.defaults.Month) {
+                        that.defaults.Day = 0
+                    } else if (currentMonth == that.defaults.Month) {
+                        that.defaults.Day = new Date().getDate()
+                    }
+                    let last_date = that.getLastDate(that.defaults.Year, that.defaults.Month)
+                    let weekDay = that.TheFirstDayOfMonthIsTheDay(that.defaults.Year, that.defaults.Month)
+                    that.showDate(that.defaults.target, last_date, weekDay);
+                    that.showCurrentTime()
+                })
+
+            },
+            showCurrentTime: function() {
+                if ($(".currenTime").length == 0) {
+                    $(this.defaults.target).append("<div class='currenTime block'></div>")
+                }
+                let currenTime = new Date(this.defaults.Year, this.defaults.Month, this.defaults.Day)
+                $(".currenTime")[0].innerHTML = currenTime.getFullYear() + "年" + (currenTime.getMonth() + 1) + "月"
+            },
+            getTime: function(year, month, day) {
+                // 获取当前时间的时间戳
+                return new Date(year, month, day).getTime()
+            },
+            addClass: function(target) {
+                $(target).addClass(this.defaults.className)
+            }
+
+        }
+    </script>
+
+</body>
+
+</html>
