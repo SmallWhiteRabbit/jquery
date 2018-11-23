@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+   
+	
+	                     <title>签到日历</title>
+                                        <!--第三版 此版本显示月份 非当月可点击跳转到相应的月 点击日期跳转有相应的样式-- >
+                    <!--今日之后不可签到 可选中   今日之前可签到 可选中-->
+                     <!--已签到显示签单图片  未签到显示未签到图片-->
+	
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width,initial-scale=1.0,maximum-scale=1.0, minimum-scale=1.0,user-scalable=0'>
+    <script src='http://mmpic.mm999.com/mpwx/cardhome/js/jquery-3.3.1.min.js'></script>
+    <script src="http://mmpic.mm999.com/mpwx/cardhome/js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
+    <script src="../js/common.js"></script>
+    <style>
+        * {
+            padding: 0px;
+            margin: 0px;
+            font-size: 0.28rem;
+            color: #333333;
+        }
+        
+        body {
+            background-color: #FFFFFF;
+            min-width: 320px;
+        }
+        
+        .img24 {
+            width: 0.48rem;
+            height: 0.48rem;
+        }
+        
+        .showTime {
+            width: 100%;
+            /* margin: 0 0.3rem; */
+            display: flex;
+            justify-content: space-between;
+            height: 1.04rem;
+            align-items: center;
+        }
+        
+        .showTime>div:nth-of-type(1) {
+            margin-left: 0.3rem;
+        }
+        
+        .showTime>div:nth-of-type(2) {
+            display: flex;
+            margin-right: 0.3rem;
+            width: 2.66rem;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+        
+        .currenTime {
+            display: block;
+            margin-top: -0.08rem;
+        }
+        
+        .showModule {
+            width: 6.9rem;
+            margin: 0 auto;
+            border-top: 1px solid RGBA(230, 230, 230, 1);
+            border-bottom: 1px solid RGBA(230, 230, 230, 1);
+        }
+        
+        .row,
+        .showWeek {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 43px;
+            line-height: 32px;
+            align-content: center;
+            margin: 0 auto;
+        }
+        
+        .dayNum {
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+            text-align: center;
+            position: relative
+        }
+        
+        .colorGrey {
+            color: RGBA(153, 153, 153, 1);
+        }
+        
+        .todayClick {
+            border: 1px solid RGBA(255, 208, 0, 1);
+            border-radius: 50%;
+        }
+        
+        .dayHasSelected {}
+        
+        .dayHasSelected::after {
+            content: '';
+            border: 2px solid RGBA(255, 208, 0, 1);
+            position: absolute;
+            top: 23px;
+            border-radius: 50%;
+            left: 14px;
+        }
+        
+        .selected {
+            background-color: RGBA(255, 208, 0, 1);
+            border-radius: 50%;
+        }
+        
+        .showPic {
+            text-align: center;
+            padding-top: 52px;
+            color: RGBA(153, 153, 153, 1);
+        }
+        
+        .showPicNo {
+            width: 165px;
+            height: 135px;
+        }
+        
+        .showPic>p {
+            color: RGBA(153, 153, 153, 1)
+        }
+        
+        .saveImg {
+            font-size: 0.24rem;
+            color: RGBA(153, 153, 153, 1);
+            position: relative;
+        }
+        
+        .saveImg>img {
+            position: relative;
+            top: 0.12rem;
+        }
+    </style>
+
+</head>
+
+<body>
+    <section id="calender" class="calender">
+    </section>
+    <!-- <div class="showPic">
+        <img src="../images/qiandao_lishi_img_kong@3x.png" class="showPicNo">
+        <p>暂无打卡记录~</p>
+    </div> -->
+    <script>
+        $(function() {
+            calender.init("#calender");
+        })
+
+        let calender = {
+            defaults: {
+                target: '', //父元素日历的父元素
+                checkDay: [1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 19, 22, 30], //已经签到的日期 可根据不同月份发送请求更改数据
+                selected: "dayHasSelected", //选中时的样式，
+                showTime: ".showTime", //时间展示
+                showPic: ".showPic", //图片展示
+                showModule: '.showModule', //日历展示块儿
+                showWeek: ".showWeek", //展示星期
+                showDate: ".showDate", //具体日期展示
+                clickYear: new Date().getFullYear(), //点击年份
+                clickMonth: new Date().getMonth(), //点击月份
+                clickDay: new Date().getDate(), //点击天
+                Year: new Date().getFullYear(), //当前年份
+                Month: new Date().getMonth(), //当前月份
+                Day: new Date().getDate(), //当前天
+            },
+            init: function(target) {
+                let that = this;
+                if (target) {
+                    that.defaults.target = target
+                    $(target).append("<div class='showTime'></div>")
+                    $(target).append("<div class='showModule'><p class='showWeek'></p><div class='showDate'></div></div>")
+                    $(target).append("<div class='showPic'> </div>")
+                }
+
+
+                that.showDate();
+                that.showWeek();
+
+            },
+            getLastDate: function(year, month) {
+                // 传入年月的上一个月的最后一天 即上一个月的总天数
+                var new_date = new Date(year, month + 1, 0);
+                return new_date.getDate()
+            },
+            getFisrstDay: function(year, month) {
+                // 传入年月的本月的第一天星期几
+                var new_date = new Date(year, month, 1);
+                return new_date.getDay()
+            },
+
+            showDate: function(num, weekDay) {
+                let that = this;
+                $(this.defaults.showTime).empty();
+                $(this.defaults.showDate).empty()
+                this.showClickTime();
+                this.showLastMonth();
+                this.showThisMonth();
+                this.showNextMonth();
+                this.bindClick();
+
+            },
+            showWeek: function() {
+                let that = this;
+                let week = ["日", "一", "二", "三", "四", "五", "六"];
+                for (let i = 0; i < week.length; i++) {
+                    const element = week[i];
+                    $(that.defaults.showWeek).append(" <span class = 'dayNum' > " + element + " </span >")
+                }
+            },
+
+            showThisMonth: function() {
+                let that = this;
+                let m = 0;
+                let thisMonthSum = that.getLastDate(that.defaults.clickYear, that.defaults.clickMonth);
+                for (let i = 0; i < thisMonthSum; i++) {
+                    let spanLen = $(".row").last().find(".dayNum").length;
+                    if (spanLen % 7 == 0) {
+                        $(that.defaults.showDate).append("<p class='row'></p>");
+                    }
+                    //本月的样式
+                    if (that.defaults.clickMonth == that.defaults.Month) {
+                        // 当天之后的天数是灰色的 有被选中的样式
+                        if ((i + 1) > that.defaults.Day) {
+                            if ((i + 1) == that.defaults.clickDay) {
+                                $(".row").last().append("<span class = 'dayNum colorGrey selected' > " + (i + 1) + " </span >")
+                            } else {
+                                $(".row").last().append("<span class = 'dayNum colorGrey' > " + (i + 1) + " </span >")
+                            }
+                            //今天之前的所有日子是可以签到的 查询签到数组
+                        } else {
+                            if (that.defaults.checkDay[m] == (i + 1)) {
+                                if (m < that.defaults.checkDay.length - 1) {
+                                    m += 1;
+                                }
+
+                                if ((i + 1) == that.defaults.clickDay && (i + 1) == that.defaults.Day && that.defaults.clickMonth == that.defaults.Month) {
+                                    // 今天 被选中 已经签到过
+                                    $(".row").last().append("<span class = 'dayNum dayHasSelected selected todayClick' > " + (i + 1) + " </span >")
+
+                                } else if ((i + 1) == that.defaults.clickDay) {
+                                    //被选中已经签到过
+                                    $(".row").last().append("<span class = 'dayNum  dayHasSelected selected ' > " + (i + 1) + " </span >")
+
+                                } else if ((i + 1) == that.defaults.Day && that.defaults.clickMonth == that.defaults.Month) {
+                                    //是今天 已经签到过
+                                    $(".row").last().append("<span class = 'dayNum dayHasSelected todayClick' > " + (i + 1) + " </span >")
+                                } else {
+                                    // 已经签到过
+                                    $(".row").last().append("<span class = 'dayNum dayHasSelected' > " + (i + 1) + " </span >")
+                                }
+                                $(".dayNum").last().on("click", function() {
+                                    $(".dayNum").not(this).removeClass("selected")
+                                    $(this).addClass("selected");
+                                    that.defaults.clickDay = (i + 1)
+
+                                    $(that.defaults.showTime).empty();
+                                    that.showClickTime();
+
+                                    // $(this).parent().siblings().find(".dayNum").removeClass("selected")
+                                })
+                            } else {
+
+                                if ((i + 1) == that.defaults.clickDay && (i + 1) == that.defaults.Day && that.defaults.clickMonth == that.defaults.Month) {
+                                    // 今天 被选中 且未签到
+                                    $(".row").last().append("<span class = 'dayNum selected dayNoSelected todayClick' > " + (i + 1) + " </span >")
+
+                                } else if ((i + 1) == that.defaults.clickDay) {
+                                    //被选中且未签到
+                                    $(".row").last().append("<span class = 'dayNum selected dayNoSelected' > " + (i + 1) + " </span >")
+
+                                } else if ((i + 1) == that.defaults.Day && that.defaults.clickMonth == that.defaults.Month) {
+                                    //是今天 且未签到
+                                    $(".row").last().append("<span class = 'dayNum dayNoSelected todayClick' > " + (i + 1) + " </span >")
+                                } else {
+                                    // 未签到
+                                    $(".row").last().append("<span class = 'dayNum dayNoSelected' > " + (i + 1) + " </span >")
+                                }
+                            }
+                            $(".dayNum").last().on("click", function() {
+                                $(".dayNum").not(this).removeClass("selected")
+                                $(this).addClass("selected");
+                                that.defaults.clickDay = (i + 1)
+
+                                $(that.defaults.showTime).empty();
+                                that.showClickTime();
+                                // $(this).parent().siblings().find(".dayNum").removeClass("selected")
+                            })
+                        }
+
+
+                    } else {
+                        if (that.defaults.checkDay[m] == (i + 1)) {
+                            if (m < that.defaults.checkDay.length - 1) {
+                                m += 1;
+                            }
+
+                            if ((i + 1) == that.defaults.clickDay && (i + 1) == that.defaults.Day && that.defaults.clickMonth == that.defaults.Month) {
+                                // 今天 被选中 已经签到过
+                                $(".row").last().append("<span class = 'dayNum dayHasSelected selected todayClick' > " + (i + 1) + " </span >")
+
+                            } else if ((i + 1) == that.defaults.clickDay) {
+                                //被选中已经签到过
+                                $(".row").last().append("<span class = 'dayNum  dayHasSelected selected ' > " + (i + 1) + " </span >")
+
+                            } else if ((i + 1) == that.defaults.Day && that.defaults.clickMonth == that.defaults.Month) {
+                                //是今天 已经签到过
+                                $(".row").last().append("<span class = 'dayNum dayHasSelected todayClick' > " + (i + 1) + " </span >")
+                            } else {
+                                // 已经签到过
+                                $(".row").last().append("<span class = 'dayNum dayHasSelected' > " + (i + 1) + " </span >")
+                            }
+                            $(".dayNum").last().on("click", function() {
+                                $(".dayNum").not(this).removeClass("selected")
+                                $(this).addClass("selected");
+                                that.defaults.clickDay = (i + 1)
+
+                                $(that.defaults.showTime).empty();
+                                that.showClickTime();
+                                // $(this).parent().siblings().find(".dayNum").removeClass("selected")
+                            })
+                        } else {
+                            if ((i + 1) == that.defaults.clickDay && (i + 1) == that.defaults.Day && that.defaults.clickMonth == that.defaults.Month) {
+                                // 今天 被选中 且未签到
+                                $(".row").last().append("<span class = 'dayNum selected dayNoSelected todayClick' > " + (i + 1) + " </span >")
+
+                            } else if ((i + 1) == that.defaults.clickDay) {
+                                //被选中且未签到
+                                $(".row").last().append("<span class = 'dayNum selected dayNoSelected' > " + (i + 1) + " </span >")
+                            } else if ((i + 1) == that.defaults.Day && that.defaults.clickMonth == that.defaults.Month) {
+                                //是今天 且未签到
+                                $(".row").last().append("<span class = 'dayNum  todayClick dayNoSelected' > " + (i + 1) + " </span >")
+                            } else {
+                                // 未签到
+                                $(".row").last().append("<span class = 'dayNum dayNoSelected' > " + (i + 1) + " </span >")
+                            }
+                            $(".dayNum").last().on("click", function() {
+                                $(".dayNum").not(this).removeClass("selected")
+                                $(this).addClass("selected");
+                                that.defaults.clickDay = (i + 1)
+
+                                $(that.defaults.showTime).empty();
+                                that.showClickTime();
+                                // $(this).parent().siblings().find(".dayNum").removeClass("selected")
+                            })
+                        }
+
+                    }
+
+                }
+
+
+            },
+            showNextMonth: function() {
+                let that = this;
+                let spanLen = $(".row").last().find(".dayNum").length;
+
+                for (let i = 0; i < 7 - spanLen; i++) {
+                    $(".row").last().append("<span class = 'dayNum colorGrey' > " + (i + 1) + " </span >");
+                    $(".colorGrey").last().on("click", function() {
+                        that.defaults.clickDay = $(this)[0].innerHTML
+                        that.nextMonth();
+                    })
+                }
+            },
+            showLastMonth() {
+                let that = this;
+                // 上个月总天数
+                let lastMonthSum = that.getLastDate(that.defaults.clickYear, that.defaults.clickMonth - 1);
+                //这个月第一天星期几
+                let thisMonthDay = that.getFisrstDay(that.defaults.clickYear, that.defaults.clickMonth);
+                if (thisMonthDay) {
+                    $(that.defaults.showDate).append("<p class='row ' ></p>");
+                }
+                for (let i = thisMonthDay; i > 0; i--) {
+                    $(".row").last().append("<span class = 'dayNum colorGrey' > " + (lastMonthSum - i + 1) + " </span >")
+                    $(".colorGrey").last().on("click", function() {
+                        that.defaults.clickDay = $(this)[0].innerHTML
+                        that.lastMonth();
+                    })
+                }
+            },
+            showClickTime: function() {
+                let that = this;
+                let week = ["日", "一", "二", "三", "四", "五", "六"];
+                let currenTime = new Date(this.defaults.clickYear, this.defaults.clickMonth, this.defaults.clickDay)
+                $(that.defaults.showTime).append("<div>" + (currenTime.getMonth() + 1) + "月" + currenTime.getDate() + "日   周" + week[currenTime.getDay()] + "</div>")
+                let month = (currenTime.getMonth() + 1) >= 10 ? (currenTime.getMonth() + 1) : "0" + (currenTime.getMonth() + 1)
+                $(that.defaults.showTime).append("<div><img src='../images/lishi_btn_left@3x.png' id='last' class='img24'><span>" + currenTime.getFullYear() + "." + month + "</span><img src='../images/lishi_btn_right@3x.png'id='next' class='img24'></div>");
+
+                $("#next").on("click", function() {
+                    console.log("点击事件21")
+                    that.nextMonth();
+                })
+                $("#last").on("click", function() {
+                    console.log("点击事件")
+                    that.lastMonth();
+                });
+            },
+
+            nextMonth: function() {
+                let that = this;
+                that.defaults.clickMonth += 1;
+
+                /*
+                 *请求下个月的签到参数
+                 *请求下个月的签到参数
+                 *请求下个月的签到参数
+                 */
+                that.showDate();
+            },
+            lastMonth: function() {
+                let that = this;
+                that.defaults.clickMonth -= 1;
+
+                /*
+                 *请求上个月的签到参数
+                 *请求上个月的签到参数
+                 *请求上个月的签到参数
+                 */
+
+                that.showDate();
+            },
+            bindClick: function() {
+                let that = this;
+                $(".dayHasSelected ").on("click", function() {
+                    $(that.defaults.showPic).empty();
+                    $(that.defaults.showPic).append('<img src="../images/qiandao_lishi_img_kong@3x.png" class="showPicNo">    <p class="saveImg"><img src="../images/qiandao_btn_baocun@3x.png" class="img24">长按保存图片或发送给朋友</p>')
+                })
+                $(".dayNoSelected").on("click", function() {
+                    $(that.defaults.showPic).empty();
+                    $(that.defaults.showPic).append('<img src="../images/qiandao_lishi_img_kong@3x.png" class="showPicNo"><p > 暂无打卡记录~</p >')
+                })
+                $(".selected").trigger("click")
+            }
+
+        }
+    </script>
+
+
+
+
+
+    <script>
+        (function() {
+            var designW = 750; //设计稿宽
+            var font_rate = 100;
+            //适配 
+            document.getElementsByTagName('html')[0].style.fontSize = document.body.offsetWidth / designW * font_rate + 'px';
+            document.getElementsByTagName('body')[0].style.fontSize = document.body.offsetWidth / designW * font_rate + 'px';
+            //监测窗口大小变化
+            window.addEventListener('onorientationchange' in window ? 'orientationchange' : 'resize', function() {
+                if (window.orientation === 180 || window.orientation === 0) {
+                    document.getElementsByTagName('html')[0].style.fontSize = document.body.offsetWidth / designW * font_rate + 'px';
+                    document.getElementsByTagName('body')[0].style.fontSize = document.body.offsetWidth / designW * font_rate + 'px';
+                }
+                if (window.orientation === 90 || window.orientation === -90) {
+                    console.log('横屏');
+                }
+            }, false);
+
+        })();
+    </script>
+
+</body>
+
+</html
