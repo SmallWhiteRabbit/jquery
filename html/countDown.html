@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>倒计时</title>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width,initial-scale=1.0,maximum-scale=1.0, minimum-scale=1.0,user-scalable=0'>
+    <script src='../js/jquery-3.3.1.min.js'></script>
+    <script src="../js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
+    <script src="../js/common.js"></script>
+
+    <style>
+        * {
+            padding: 0px;
+            margin: 0px;
+            font-size: 0.28rem;
+            color: #333333;
+        }
+        
+        body {
+            background-color: #F5F5F5;
+            min-width: 320px;
+        }
+        
+        .section {
+            margin: 0.3rem;
+            background-color: #FFFFFF;
+            border-radius: 5px;
+            /* padding-left: 0.26rem; */
+            padding-bottom: 0.4rem;
+            padding-top: 0.4rem;
+        }
+        
+        .timeDiv {
+            margin: 0 18px;
+            text-align: center;
+            padding: 0.36rem 0;
+            background-color: #F2F2F2;
+            border: 5px;
+        }
+        
+        .timeDiv>span {
+            color: #666666
+        }
+        .orange {
+            color: rgba(255, 136, 0, 1);
+            font-size: 30px;
+            margin-left: 7px;
+            margin-right: 6px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <section class="section">
+        <div class="timeDiv">
+            <p class="countDown"><span class="orange">00</span><span>天</span><span class="orange">00</span><span>时</span><span class="orange">00</span><span>分</span><span class="orange">00</span><span>秒</span></p>
+            <p>邀请好友即可获得VIP时长哦~</p>
+        </div>
+    </section>
+
+
+
+
+
+    <script>
+        $(function() {
+            Countdown.init(".countDown", "2019-11-25 00:00")
+        })
+    </script>
+    <script>
+        var Countdown = {
+            defaults: {
+                isiOS: "",
+                // severTime: "",
+                isAndroid: "",
+                endTime: "",
+                dateFinal: "",
+                curTime: "",
+                D_value: 0,
+                target: ""
+            },
+            init: function(target, time) {
+                var u = navigator.userAgent,
+                    app = navigator.appVersion;
+                this.defaults.isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+                this.defaults.isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                // this.defaults.severTime = new Date();
+                this.defaults.endTime = time;
+                this.defaults.target = target;
+                this.getTime()
+
+            },
+            getTime: function() {
+                let that = this;
+                // var severNow = new Date(that.defaults.severTime).getTime(); //服务器时间
+                // var dateNow = new Date().getTime(); //获取系统本地当前时间
+                // if (this.defaults.isiOS) {
+                //     var severNow = new Date(that.defaults.severTime.replace(/-/g, '/')).getTime();
+                // }
+                // that.defaults.D_value = severNow - dateNow; //本地与服务器的差值
+                var intervalDate = setInterval(function() {
+                    that.countDown(that.defaults.endTime);
+                }, 1000);
+            },
+            countDown(time) {
+                this.defaults.dateFinal = new Date(time).getTime(); //设置倒计时到达时间
+                this.defaults.curTime = new Date().getTime() + this.defaults.D_value;
+
+                if (this.defaults.isiOS) { //兼容IOS
+                    this.defaults.dateFinal = new Date(time.replace(/-/g, '/')).getTime(); //设置倒计时到达时间
+                    this.defaults.curTime = new Date().getTime() + this.defaults.D_value;
+                }
+                var dateSub = this.defaults.dateFinal - this.defaults.curTime; //计算结束时间与开始时间差值，单位毫秒
+                var timeHtml = '';
+                if (dateSub < 0) {
+                    timeHtml += '<span class="orange">00</span><span>天</span><span class="orange">00</span><span>时</span><span class="orange">00</span><span>分</span><span class="orange">00</span><span>秒</span>';
+                    $(this.defaults.target).html(timeHtml);
+                    return;
+                }
+                var day = hour = minute = second = dayBase = hourBase = minuteBase = secondBase = 0; //初始化各个数值
+                dayBase = 24 * 60 * 60 * 1000; //计算天数的基数，单位毫秒。1天等于24*60*60*1000毫秒
+                hourBase = 60 * 60 * 1000; //计算小时的基数，单位毫秒。1小时等于60*60*1000毫秒
+                minuteBase = 60 * 1000; //计算分钟的基数，单位毫秒。1分钟等于60*1000毫秒
+                secondBase = 1000; //计算秒钟的基数，单位毫秒。1秒钟等于1000毫秒
+                day = Math.floor(dateSub / dayBase); //计算天数，并取下限值。如 5.9天 = 5天
+                hour = Math.floor(dateSub % dayBase / hourBase); //计算小时，并取下限值。如 20.59小时 = 20小时
+                minute = Math.floor(dateSub % dayBase % hourBase / minuteBase); //计算分钟，并取下限值。如 20.59分钟 = 20分钟
+                second = Math.floor(dateSub % dayBase % hourBase % minuteBase / secondBase); //计算秒钟，并取下限值。如 20.59秒 = 20秒
+                timeHtml += '<span class="orange">' + this.toDouble(day) + '</span><span>天</span><span class="orange"> ' + this.toDouble(hour) + ' </span><span>时</span><span class="orange">' + this.toDouble(minute) + '</span > <span>分</span> <span class="orange"> ' + this.toDouble(second) + ' </span><span>秒</span>';
+                $(this.defaults.target).empty().html(timeHtml);
+                if (hour == 0 && minute == 0 && second == 0) {
+                    //倒计时结束后要进行的操作
+
+
+                }
+            },
+            toDouble: function(num) {
+                if (num < 10) {
+                    return '0' + num;
+                } else {
+                    return '' + num;
+                }
+            }
+
+
+        }
+    </script>
+
+
+
+
+    <script>
+        (function() {
+            var designW = 750; //设计稿宽
+            var font_rate = 100;
+            //适配 
+            document.getElementsByTagName('html')[0].style.fontSize = document.body.offsetWidth / designW * font_rate + 'px';
+            document.getElementsByTagName('body')[0].style.fontSize = document.body.offsetWidth / designW * font_rate + 'px';
+            //监测窗口大小变化
+            window.addEventListener('onorientationchange' in window ? 'orientationchange' : 'resize', function() {
+                if (window.orientation === 180 || window.orientation === 0) {
+                    document.getElementsByTagName('html')[0].style.fontSize = document.body.offsetWidth / designW * font_rate + 'px';
+                    document.getElementsByTagName('body')[0].style.fontSize = document.body.offsetWidth / designW * font_rate + 'px';
+                }
+                if (window.orientation === 90 || window.orientation === -90) {
+                    console.log('横屏');
+                }
+            }, false);
+
+        })();
+    </script>
+
+</body>
+
+</html

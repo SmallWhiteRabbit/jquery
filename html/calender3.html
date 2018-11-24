@@ -2,17 +2,17 @@
 <html>
 
 <head>
-   
-	
-	                     <title>签到日历</title>
-                                        <!--第三版 此版本显示月份 非当月可点击跳转到相应的月 点击日期跳转有相应的样式-- >
-                    <!--今日之后不可签到 可选中   今日之前可签到 可选中-->
-                     <!--已签到显示签单图片  未签到显示未签到图片-->
-	
+
+
+    <title>签到日历</title>
+    <!-- 第三版 此版本显示月份 非当月可点击跳转到相应的月 点击日期跳转有相应的样式
+        今日之后不可签到 可选中   今日之前可签到 可选中
+    已签到显示签单图片  未签到显示未签到图片 -->
+
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width,initial-scale=1.0,maximum-scale=1.0, minimum-scale=1.0,user-scalable=0'>
-    <script src='http://mmpic.mm999.com/mpwx/cardhome/js/jquery-3.3.1.min.js'></script>
-    <script src="http://mmpic.mm999.com/mpwx/cardhome/js/jquery.cookie.js"></script>
+    <script src='../js/jquery-3.3.1.min.js'></script>
+    <script src="../js/jquery.cookie.js"></script>
     <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
     <script src="../js/common.js"></script>
     <style>
@@ -143,10 +143,6 @@
 <body>
     <section id="calender" class="calender">
     </section>
-    <!-- <div class="showPic">
-        <img src="../images/qiandao_lishi_img_kong@3x.png" class="showPicNo">
-        <p>暂无打卡记录~</p>
-    </div> -->
     <script>
         $(function() {
             calender.init("#calender");
