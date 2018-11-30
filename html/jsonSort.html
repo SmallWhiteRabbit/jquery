@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>json排序
+    </title>
+
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width,initial-scale=1.0,maximum-scale=1.0, minimum-scale=1.0,user-scalable=0'>
+    <script src='http://mmpic.mm999.com/mpwx/cardhome/js/jquery-3.3.1.min.js'></script>
+
+
+
+    <script>
+        function sortId(a, b) {
+            return a.dktime - b.dktime
+        }
+        $(function() {
+
+            let json = [{
+                "userid": "2d2783efeddfdb1c8fe52112",
+                "nickname": "我的世界很小",
+                "headimg": "http://gushi.huluboshi.com/headimg/201811/01Nov2018170346444.jpeg",
+                "clockid": "63",
+                "likenum": "0",
+                "regtime": "1543564858",
+                "islike": "0",
+                "dktime": "1543564858",
+                "isremind": "0",
+                "clockdays": "1"
+            }, {
+                "userid": "ae5c0b957c36685a69e38393",
+                "nickname": "兵龙",
+                "headimg": "http://gushi.huluboshi.com/headimg/201811/01Nov2018172723211.jpeg",
+                "clockid": "64",
+                "likenum": "0",
+                "regtime": "1543568456",
+                "islike": "0",
+                "dktime": "1543568456",
+                "isremind": "1",
+                "clockdays": "1"
+            }, {
+                "userid": "39b8b5874631e508f138f59d",
+                "nickname": "冰龙",
+                "headimg": "http://gushi.huluboshi.com/headimg/201811/01Nov2018174531422.jpeg",
+                "clockid": "0",
+                "likenum": "0",
+                "regtime": "0",
+                "islike": "0",
+                "dktime": "9999999999",
+                "isremind": "0",
+                "clockdays": "0"
+            }]
+            json.sort(sortId);
+            console.log(json)
+        })
+    </script>
+
+    <style>
+        * {
+            padding: 0px;
+            margin: 0px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+
+    <script>
+        (function() {
+            var designW = 750; //设计稿宽
+            var font_rate = 100;
+            //适配 
+            document.getElementsByTagName('html')[0].style.fontSize = document.body.offsetWidth / designW * font_rate + 'px';
+            document.getElementsByTagName('body')[0].style.fontSize = document.body.offsetWidth / designW * font_rate + 'px';
+            //监测窗口大小变化
+            window.addEventListener('onorientationchange' in window ? 'orientationchange' : 'resize', function() {
+                if (window.orientation === 180 || window.orientation === 0) {
+                    document.getElementsByTagName('html')[0].style.fontSize = document.body.offsetWidth / designW * font_rate + 'px';
+                    document.getElementsByTagName('body')[0].style.fontSize = document.body.offsetWidth / designW * font_rate + 'px';
+                }
+                if (window.orientation === 90 || window.orientation === -90) {
+                    console.log('横屏');
+                }
+            }, false);
+        })();
+    </script>
+
+</body>
+
+</html>
